@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/qss">
+        <file>Button.qss</file>
+        <file>Combinear.qss</file>
+    </qresource>
+</RCC>
