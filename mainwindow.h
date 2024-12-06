@@ -11,8 +11,12 @@
 #include <QDebug>
 #include <QThread>
 #include <QMessageBox>
+#include <QStackedLayout>
+#include <QResizeEvent>
+#include <QTime>
+#include <QScrollBar>
 #include "BPlusTree.h"
-#include "Arrows.h"
+#include "arrowoverlay.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -31,6 +35,7 @@ private:
     QVector<QVector<QVector<QLabel*>>> *treeDate;
     BPlusTree *tree;
     ArrowOverlay *arrowOverlay;
+    QVector<QString> msgs;
     int rankNow;
     void flushDate();
     void iterateBPNode(int rank,BPNode* now);
@@ -39,11 +44,22 @@ private:
     void clearTreeRankLayout(int j);
     void clearTreeDate(int i,int j);
     void drawArrows();
+    void addMessage(const QString &message, const QColor &color = Qt::black);
+    void appendStyledText(const QString &text, const QColor &color);
 
 private slots:
     void inserte();
     void delet();
     void find();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override {
+        QWidget::resizeEvent(event);
+        if (arrowOverlay) {
+            arrowOverlay->resize(event->size());
+            drawArrows();
+        }
+    }
 
 public:
     MainWindow(QWidget *parent = nullptr);

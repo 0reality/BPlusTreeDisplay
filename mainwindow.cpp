@@ -22,15 +22,14 @@ MainWindow::MainWindow(QWidget *parent)
         this->setStyleSheet(ButtonStyle);
     }
 
-    arrowOverlay = new ArrowOverlay(this);
-    arrowOverlay->setStyleSheet("background-color:red;");
-    arrowOverlay->resize(1000,1000);
-    arrowOverlay->show();
+    ui->messegeLabel->setReadOnly(true);
 
+    arrowOverlay = new ArrowOverlay(ui->displayWidget);
 
     connect(ui->inButton,SIGNAL(clicked(bool)),this,SLOT(inserte()));
     connect(ui->delButton,SIGNAL(clicked(bool)),this,SLOT(delet()));
     connect(ui->findButton,SIGNAL(clicked(bool)),this,SLOT(find()));
+
 }
 
 MainWindow::~MainWindow()
@@ -143,9 +142,11 @@ void MainWindow::inserte(){
     bool isSuccess = tree->insertBPNode(key,value);
     if(isSuccess){
         flushDate();
+        addMessage("插入成功一个key:" + QString::number(key) + ",value:" + QString::number(value) + "的节点",Qt::white);
     }
     else{
         QMessageBox::critical(this, "插入失败", "key已经存在!!");
+        addMessage("插入失败已经存在key:" + QString::number(key) + "的节点",Qt::white);
     }
 }
 
@@ -154,9 +155,11 @@ void MainWindow::delet(){
     bool isSuccess = tree->deleteBPNode(key);
     if(isSuccess){
         flushDate();
+        addMessage("删除成功key:" + QString::number(key) + "的节点",Qt::white);
     }
     else{
         QMessageBox::critical(this, "删除失败", "key不存在!!");
+        addMessage("删除失败,没有找到key:" + QString::number(key) + "的节点",Qt::white);
     }
 }
 
@@ -164,26 +167,57 @@ void MainWindow::find(){
     int key = ui->findKeySpinBox->value();
     LNode* isSuccess = tree->findBPNode(key);
     if(isSuccess){
-        QMessageBox::information(this, "查找成功", "key：" + QString::number(key) + " and value：" + QString::number(isSuccess->getValue()));
+        QString msg = "key：" + QString::number(key) + " and value：" + QString::number(isSuccess->getValue());
+        QMessageBox::information(this, "查找成功", msg);
+        addMessage("查找到了" + msg,Qt::white);
     }
     else{
         QMessageBox::critical(this, "删除失败", "key不存在!!");
+        addMessage("查找失败没有找到key:" + QString::number(key) + "的节点",Qt::white);
     }
 }
 
 void MainWindow::drawArrows(){
+    arrowOverlay->clearArrows();
+    QApplication::processEvents();
     for(int i = 0;i < treeLayout->size() - 1;i++){
-        qDebug() << i << "<-i";
-        for(int j = 0;j < (*treeRankWidget)[i].size();j++){
+        for(int j = 0,total = 0;j < (*treeRankWidget)[i].size();j++){
             for(int k = 0;k < (*treeDate)[i][j].size();k++){
-                QPoint start = this->mapFromGlobal((*treeDate)[i][j][k]->mapToGlobal(QPoint(0, (*treeDate)[i][j][k]->height())));
-                QPoint end = this->mapFromGlobal((*treeRankWidget)[i + 1][k]->mapToGlobal(QPoint((*treeRankWidget)[i + 1][k]->width() / 2, 0)));
-                qDebug() << start.x() << " " << start.y() << "->" << end.x() << " " << end.y() << "\n";
-                qDebug() << i << " " << j << " " << k << "\n";
-                arrowOverlay->addArrow(start,end);
+                QLabel* s = (*treeDate)[i][j][k];
+                QWidget* e = (*treeRankWidget)[i + 1][total++];
+                qDebug() << s << " " << e;
+                QPoint start = arrowOverlay->mapFromGlobal(s->mapToGlobal(QPoint(s->width() / 2, s->height())));
+                QPoint end = arrowOverlay->mapFromGlobal(e->mapToGlobal(QPoint(e->width() / 2, 0)));
+                qDebug() << start << "->" << end;
+                arrowOverlay->addArrow(start,end,Qt::white,2);
             }
         }
     }
+}
+
+void MainWindow::addMessage(const QString &message, const QColor &color)
+{
+    QDateTime now = QDateTime::currentDateTime();
+    QString timestamp = now.toString("hh:mm:ss");
+
+    appendStyledText("[" + timestamp + "] " + message, color);
+
+    QScrollBar* verticalBar = ui->messegeLabel->verticalScrollBar();
+
+    verticalBar->setValue(verticalBar->maximum());
+}
+
+void MainWindow::appendStyledText(const QString &text, const QColor &color)
+{
+    QTextCharFormat format;
+    format.setForeground(color);
+
+    QTextCursor cursor = ui->messegeLabel->textCursor();
+    cursor.movePosition(QTextCursor::End);
+    ui->messegeLabel->setTextCursor(cursor);
+
+    ui->messegeLabel->mergeCurrentCharFormat(format);
+    ui->messegeLabel->insertPlainText(text + "\n");
 }
 
 
