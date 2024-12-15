@@ -11,6 +11,7 @@ bool LinkList::deleteNode(int key){
     if (p->getPrev() != nullptr) {
         p->getPrev()->setNext(p->getNext());
         if(p->getNext())p->getNext()->setPrev(p->getPrev());
+        else tail = p->getPrev();
     } else {
         head = p->getNext();
         if(head != nullptr)head->setPrev(nullptr);
@@ -100,6 +101,33 @@ LinkList* LinkList::splitList(int i) {
     return newList;
 }
 
+void LinkList::mergeList(LinkList* other){
+    size += other->getSize();
+    if(other->getHead()->getKey() > head->getKey()){
+        tail->setNext(other->getHead());
+        other->getHead()->setPrev(tail);
+        qDebug()<<"tail1"<<tail;
+        tail = other->getTail();
+        qDebug() << tail->getKey();
+        qDebug()<<"tail2"<<tail;
+    }
+    else{
+        head->setPrev(other->getTail());
+        other->getTail()->setNext(head);
+        qDebug()<<"head1"<<head;
+        head = other->getHead();
+        qDebug()<<"head2"<<head;
+    }
+
+    other->setEmpty();
+}
+
+void LinkList::borrowNode(LinkList* other){
+    LNode *oHead = other->getHead();
+    insertNode(oHead->getKey(),oHead->getValue(),oHead->getChild());
+    other->deleteNode(oHead->getKey());
+}
+
 LNode* BPNode::findKey(int key) const {
     return linkList->findKey(key);
 }
@@ -154,7 +182,12 @@ bool BPlusTree::deleteBPNodeTree(int key,BPNode *node) {
     if(node->getLinkList()->getSize() == 0 && node != root){
         deleteBPNodeTree(key,node->getFather());
         delete node;
-    }else node->updateKey();
+    }else {
+        qDebug() << "nodeSize:" << node->getSize();
+        if(node->getSize() < rank / 2 && node != root){
+            mergeBPNode(node->getFather());
+        }else node->updateKey();
+    }
     return isSuccess;
 }
 
@@ -162,7 +195,13 @@ bool BPlusTree::deleteBPNode(int key){
     BPNode *node = getBPNode(key,root);
     if(node == nullptr)return false;
     bool isSuccess = deleteBPNodeTree(key, node);
-    if(root->getLinkList()->getSize() == 0){delete root;root = new BPNode();}
+    while(root->getSize() == 1 && !root->isLeaf()){
+        BPNode * tmp = root;
+        root = root->getLinkList()->getHead()->getChild();
+        root->setFather(nullptr);
+        delete tmp;
+    }
+    if(root->getSize() == 0){delete root;root = new BPNode();}
     return isSuccess;
 }
 
@@ -197,7 +236,7 @@ void BPlusTree::printBPlusTree() const {
 void BPlusTree::splitBPNode(BPNode *node) {
     LinkList* linkList = node->getLinkList();
     if (linkList->getSize() < rank) return;
-    int mid = rank / 2 + 1;
+    int mid = (rank + 1) / 2 + 1;
     LinkList* newLink = linkList->splitList(mid);
     BPNode* newBPNode = new BPNode(node->isLeaf(), node->getFather(), newLink);
     if (node->getFather() == nullptr) {
@@ -245,6 +284,35 @@ BPNode* BPlusTree::getBPNode(int key, BPNode *now) const {
         p = p->getNext();
     }
     return getBPNode(key, nextNode);
+}
+
+void BPlusTree::mergeBPNode(BPNode *node){
+    LinkList *linkList = node->getLinkList();
+    LNode *p = linkList->getHead();
+    while(p != nullptr){
+        if(p->getChild() != nullptr && p->getChild()->getSize() < rank / 2)break;
+        p = p->getNext();
+    }
+    if(p == nullptr)return;
+    LNode *bro = nullptr;
+    if(p->getPrev() != nullptr)bro = p->getPrev();
+    else if(p->getNext() != nullptr)bro = p->getNext();
+    else return ;
+    BPNode *pNode = p->getChild(),*broNode = bro->getChild();
+    int broSize = broNode->getSize();
+    int nowSize = pNode->getSize();
+    if(nowSize + broSize >= rank){
+        pNode->getLinkList()->borrowNode(broNode->getLinkList());
+        broNode->updateKey();
+    }
+    else{
+        pNode->getLinkList()->mergeList(broNode->getLinkList());
+        deleteBPNodeTree(bro->getKey(),node);
+        pNode->updateKey();
+        delete broNode;
+    }
+    pNode->updateFather();
+
 }
 
 // int main() {

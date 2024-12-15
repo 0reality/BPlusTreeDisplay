@@ -15,8 +15,10 @@
 #include <QResizeEvent>
 #include <QTime>
 #include <QScrollBar>
+#include <QStack>
 #include "BPlusTree.h"
 #include "arrowoverlay.h"
+#include "isConfirm.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -36,6 +38,8 @@ private:
     BPlusTree *tree;
     ArrowOverlay *arrowOverlay;
     QVector<QString> msgs;
+    QStack<QVector<int>> stack;
+    isConfirm* confirm;
     int rankNow;
     void flushDate();
     void iterateBPNode(int rank,BPNode* now);
@@ -51,6 +55,9 @@ private slots:
     void inserte();
     void delet();
     void find();
+    void withdraw();
+    void rank();
+    void notingWidget();
 
 protected:
     void resizeEvent(QResizeEvent *event) override {

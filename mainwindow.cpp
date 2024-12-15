@@ -24,12 +24,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->messegeLabel->setReadOnly(true);
 
+    ui->rankSpinBox->setMinimum(3);
+    ui->rankSpinBox->setValue(4);
+
     arrowOverlay = new ArrowOverlay(ui->displayWidget);
 
     connect(ui->inButton,SIGNAL(clicked(bool)),this,SLOT(inserte()));
     connect(ui->delButton,SIGNAL(clicked(bool)),this,SLOT(delet()));
     connect(ui->findButton,SIGNAL(clicked(bool)),this,SLOT(find()));
-
+    connect(ui->withdrawButton,SIGNAL(clicked(bool)),this,SLOT(withdraw()));
+    connect(ui->rankButton,SIGNAL(clicked(bool)),this,SLOT(notingWidget()));
 }
 
 MainWindow::~MainWindow()
@@ -40,7 +44,43 @@ MainWindow::~MainWindow()
     delete treeDate;
     delete treeRankWidget;
     delete tree;
+    delete arrowOverlay;
     delete ui;
+}
+
+void MainWindow::notingWidget(){
+    confirm = new isConfirm(this);
+    confirm->show();
+}
+
+void MainWindow::rank(){
+    int value = ui->rankSpinBox->value();
+    delete tree;
+    delete confirm;
+    addMessage("rank更改为rank=" + QString::number(value),Qt::white);
+    clearTreeLayout();
+    stack.clear();
+    tree = new BPlusTree(value);
+    flushDate();
+}
+
+void MainWindow::withdraw(){
+    if(stack.empty()){
+        QMessageBox::critical(this,"撤回失败","已经退回到初始状态");
+        return;
+    }
+    QVector<int> qv = stack.pop();
+    switch(qv[0]){
+        case 1:
+            tree->deleteBPNode(qv[1]);
+            break;
+        case 2:
+            tree->insertBPNode(qv[1],qv[2]);
+            break;
+        default:break;
+    }
+    addMessage("撤回了一个操作",Qt::white);
+    flushDate();
 }
 
 void MainWindow::flushDate(){
@@ -142,6 +182,7 @@ void MainWindow::inserte(){
     bool isSuccess = tree->insertBPNode(key,value);
     if(isSuccess){
         flushDate();
+        stack.push({1,key,value});
         addMessage("插入成功一个key:" + QString::number(key) + ",value:" + QString::number(value) + "的节点",Qt::white);
     }
     else{
@@ -152,9 +193,12 @@ void MainWindow::inserte(){
 
 void MainWindow::delet(){
     int key = ui->delKeySpinButton->value();
+    LNode* lNode = tree->findBPNode(key);
+    int value = lNode != nullptr ? lNode->getValue() : 0;
     bool isSuccess = tree->deleteBPNode(key);
     if(isSuccess){
         flushDate();
+        stack.push({2,key,value});
         addMessage("删除成功key:" + QString::number(key) + "的节点",Qt::white);
     }
     else{
@@ -185,13 +229,23 @@ void MainWindow::drawArrows(){
             for(int k = 0;k < (*treeDate)[i][j].size();k++){
                 QLabel* s = (*treeDate)[i][j][k];
                 QWidget* e = (*treeRankWidget)[i + 1][total++];
-                qDebug() << s << " " << e;
+                //qDebug() << s << " " << e;
                 QPoint start = arrowOverlay->mapFromGlobal(s->mapToGlobal(QPoint(s->width() / 2, s->height())));
                 QPoint end = arrowOverlay->mapFromGlobal(e->mapToGlobal(QPoint(e->width() / 2, 0)));
-                qDebug() << start << "->" << end;
+                //qDebug() << start << "->" << end;
                 arrowOverlay->addArrow(start,end,Qt::white,2);
             }
         }
+    }
+    int maxRankIdx = treeLayout->size() - 1;
+    if(maxRankIdx < 0)return;
+    int cnt = (*treeRankWidget)[maxRankIdx].size();
+    for(int i = 1;i < cnt;i++){
+        QWidget* s = (*treeRankWidget)[maxRankIdx][i - 1];
+        QWidget* e = (*treeRankWidget)[maxRankIdx][i];
+        QPoint start = arrowOverlay->mapFromGlobal(s->mapToGlobal(QPoint(s->width(), s->height() / 2)));
+        QPoint end = arrowOverlay->mapFromGlobal(e->mapToGlobal(QPoint(0, e->height() / 2)));
+        arrowOverlay->addArrow(start,end,Qt::white,2);
     }
 }
 

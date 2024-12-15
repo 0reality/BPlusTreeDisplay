@@ -11,15 +11,18 @@ CONFIG += c++17
 SOURCES += \
     BPlusTree.cpp \
     arrowoverlay.cpp \
+    isConfirm.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     BPlusTree.h \
     arrowoverlay.h \
+    isConfirm.h \
     mainwindow.h
 
 FORMS += \
+    isConfirm.ui \
     mainwindow.ui
 
 # Default rules for deployment.

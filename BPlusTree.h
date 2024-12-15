@@ -35,6 +35,7 @@ private:
 public:
     LNode* getHead() const { return head; }
     LNode* getTail() const { return tail; }
+    void setEmpty(){head = tail = nullptr;size = 0;}
     int getSize() const { return size; }
     int getHeadKey() const;
     bool insertNode(int key, int value, BPNode* child);
@@ -44,6 +45,8 @@ public:
     bool cmp(LNode* a, LNode* b) const { return b->getKey() >= a->getKey(); }
     LNode* findKey(int key) const;
     bool deleteNode(int key);
+    void mergeList(LinkList* other);
+    void borrowNode(LinkList* other);
 
 public:
     LinkList() : head(nullptr), tail(nullptr), size(0) {}
@@ -72,12 +75,13 @@ public:
     void printKeys() const;
     void updateKey();
     void updateFather();
+    int getSize(){if(linkList != nullptr)return linkList->getSize();return -1;}
 
     LNode* findKey(int key) const;
 
 public:
     BPNode(bool isLe = true, BPNode* fa = nullptr, LinkList* link = new LinkList())
-        : isLeafs(isLe), father(fa), linkList(link) {}
+        : father(fa), linkList(link), isLeafs(isLe){}
     ~BPNode() { delete linkList; }
 };
 
@@ -93,6 +97,7 @@ public:
     bool insertBPlusTree(int key, int value, BPNode *node, BPNode* child = nullptr);
     BPNode* getBPNode(int key, BPNode *now) const;
     void splitBPNode(BPNode *node);
+    void mergeBPNode(BPNode *node);
     void printBPlusTree() const;
     bool insertBPNode(int key, int value);
     bool deleteBPNodeTree(int key,BPNode *node);
