@@ -40,6 +40,7 @@ private:
     QVector<QString> msgs;
     QStack<QVector<int>> stack;
     isConfirm* confirm;
+    int choice;
     int rankNow;
     void flushDate();
     void iterateBPNode(int rank,BPNode* now);
@@ -50,14 +51,17 @@ private:
     void drawArrows();
     void addMessage(const QString &message, const QColor &color = Qt::black);
     void appendStyledText(const QString &text, const QColor &color);
+    void rank();
+    void notingWidget();
 
 private slots:
     void inserte();
     void delet();
     void find();
     void withdraw();
-    void rank();
-    void notingWidget();
+    void accept();
+    void rankChange(){choice = 1;notingWidget();}
+    void clearTree(){choice = 2;notingWidget();}
 
 protected:
     void resizeEvent(QResizeEvent *event) override {

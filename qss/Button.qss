@@ -1,0 +1,84 @@
+QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #ADD8E6, stop:1 #00008B);
+    border-radius: 5px;
+    color: white;
+    margin: 5px 5px 5px 20px;
+    min-width: 150px;
+    min-height: 18px;
+    padding: 6px;
+}
+
+QPushButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #7e9ece, stop:1 #141895);
+}
+
+QPushButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #87CEEB, stop:1 #4169E1);
+}
+
+
+
+QWidget#displayWidget{
+    background: #2f2f2f;
+    border-radius: 4px;
+}
+
+
+
+QSpinBox {
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    margin: 5px 5px 5px 20px;
+    height: 40px;
+    color: white;
+    border: 2px solid qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                            stop:0 #ADD8E6, stop:1 #00008B);
+    font-size: 14px;
+}
+
+QSpinBox::up-button, QSpinBox::down-button {
+    subcontrol-origin: border;
+    margin: 0px 10px 0px 10px;
+    width: 20px;
+    background-color: #1e1e1e;
+}
+
+QSpinBox::up-button {
+    subcontrol-position: right;
+}
+
+QSpinBox::down-button {
+    subcontrol-position: left;
+}
+
+QSpinBox::up-arrow {
+    image: url(:/img/img/add.png);
+}
+
+QSpinBox::down-arrow {
+    image: url(:/img/img/sub.png);
+}
+
+QSpinBox::up-arrow:hover, QSpinBox::down-arrow:hover {
+    background: #a3cbe1;
+    border-radius: 5px;
+    border: 1px solid white;
+}
+
+QPlainTextEdit{
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                        stop:0 #3e3e3e, stop:1 #000000);
+    border: 1px solid grey;
+    border-radius: 5px;
+    margin: 10px 0px 0px 0px;
+}
+
+QLabel{
+    margin: 5px 5px 5px 20px;
+    color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                        stop:0 #accbee, stop:1 #e7f0fd);
+}
+

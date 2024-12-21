@@ -1,6 +1,11 @@
 <RCC>
     <qresource prefix="/qss">
-        <file>Button.qss</file>
-        <file>Combinear.qss</file>
+        <file>qss/Button.qss</file>
+        <file>qss/Combinear.qss</file>
+    </qresource>
+    <qresource prefix="/img">
+        <file>img/add.png</file>
+        <file>img/BPlusTreeLogo.ico</file>
+        <file>img/sub.png</file>
     </qresource>
 </RCC>

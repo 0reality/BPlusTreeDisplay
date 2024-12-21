@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "./head/mainwindow.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     tree = new BPlusTree(4);
 
     //初始化串口样式
-    QFile qf(":/qss/Combinear.qss");
+    QFile qf(":/qss/qss/Button.qss");
     if(qf.open(QFile::ReadOnly | QFile::Text)){
         QTextStream r(&qf);
         QString ButtonStyle = r.readAll();
@@ -33,7 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->delButton,SIGNAL(clicked(bool)),this,SLOT(delet()));
     connect(ui->findButton,SIGNAL(clicked(bool)),this,SLOT(find()));
     connect(ui->withdrawButton,SIGNAL(clicked(bool)),this,SLOT(withdraw()));
-    connect(ui->rankButton,SIGNAL(clicked(bool)),this,SLOT(notingWidget()));
+    connect(ui->rankButton,SIGNAL(clicked(bool)),this,SLOT(rankChange()));
+    connect(ui->clearButton,SIGNAL(clicked(bool)),this,SLOT(clearTree()));
 }
 
 MainWindow::~MainWindow()
@@ -62,6 +63,17 @@ void MainWindow::rank(){
     stack.clear();
     tree = new BPlusTree(value);
     flushDate();
+}
+
+void MainWindow::accept(){
+    if(choice == 1)rank();
+    else{
+        clearTreeLayout();
+        int rank = tree->getRank();
+        delete tree;
+        tree = new BPlusTree(rank);
+        addMessage("删除了一棵树",Qt::white);
+    }
 }
 
 void MainWindow::withdraw(){
