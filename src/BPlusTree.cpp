@@ -1,4 +1,4 @@
-#include "BPlusTree.h"
+#include "./head/BPlusTree.h"
 
 using namespace std;
 
@@ -312,7 +312,6 @@ void BPlusTree::mergeBPNode(BPNode *node){
         delete broNode;
     }
     pNode->updateFather();
-
 }
 
 // int main() {
